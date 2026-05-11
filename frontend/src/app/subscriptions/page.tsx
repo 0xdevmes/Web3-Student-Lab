@@ -2,7 +2,6 @@
 
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
-import { useWallet } from '@/contexts/WalletContext';
 
 const SubscriptionDashboard = dynamic(
   () =>
@@ -11,7 +10,6 @@ const SubscriptionDashboard = dynamic(
 );
 
 export default function SubscriptionsPage() {
-  const { isConnected } = useWallet();
 
   return (
     <div className="min-h-screen bg-gray-50">
