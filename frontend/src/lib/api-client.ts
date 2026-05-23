@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+import { API_BASE_URL, getWorkspaceId } from './api-config';
 
 // Create axios instance
 const apiClient = axios.create({
@@ -18,6 +17,8 @@ apiClient.interceptors.request.use(async (config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  config.headers['x-workspace-id'] = getWorkspaceId();
 
   // Handle Payload Encryption for sensitive data
   if (config.data && (config as any).encrypt) {
@@ -46,6 +47,11 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/auth/login';
     }
+
+    if (error.response?.data?.error && !error.message) {
+      error.message = error.response.data.error;
+    }
+
     return Promise.reject(error);
   }
 );

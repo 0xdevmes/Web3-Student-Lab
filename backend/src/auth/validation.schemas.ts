@@ -26,6 +26,10 @@ export const registerSchema = z.object({
       /^[a-zA-Z\s'-]+$/,
       'Last name can only contain letters, spaces, hyphens, and apostrophes'
     ),
+  walletAddress: z
+    .string()
+    .regex(/^G[A-Z2-7]{55}$/, 'Invalid Stellar wallet address format')
+    .optional(),
 });
 
 /**

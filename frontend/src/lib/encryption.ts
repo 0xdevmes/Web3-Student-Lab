@@ -1,3 +1,5 @@
+import { API_BASE_URL, getWorkspaceId } from './api-config';
+
 /**
  * Utility for End-to-End Payload Encryption
  */
@@ -12,9 +14,11 @@ export interface EncryptedPayload {
  */
 async function fetchPublicKey(): Promise<{ keyId: string; publicKey: string }> {
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/v1/security/public-key`
-    );
+    const response = await fetch(`${API_BASE_URL}/security/public-key`, {
+      headers: {
+        'x-workspace-id': getWorkspaceId(),
+      },
+    });
     const result = await response.json();
 
     if (result.status === 'success') {

@@ -1,7 +1,9 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { useWallet } from '@/contexts/WalletContext';
 import { certificatesAPI, Course, coursesAPI, enrollmentsAPI } from '@/lib/api';
+import { getCourseContent } from '@/lib/course-content';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -9,7 +11,8 @@ import { useEffect, useState } from 'react';
 export default function CourseDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const { publicKey } = useWallet();
   const [course, setCourse] = useState<Course | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEnrolled, setIsEnrolled] = useState(false);
@@ -44,7 +47,17 @@ export default function CourseDetailPage() {
   }, [params, user, router]);
 
   const handleEnroll = () => {
-    if (!user || !course) return;
+    if (!course) return;
+
+    if (!publicKey) {
+      router.push('/auth/login');
+      return;
+    }
+
+    if (!user) {
+      router.push('/auth/register');
+      return;
+    }
 
     router.push(
       `/enroll?courseId=${encodeURIComponent(course.id)}&courseTitle=${encodeURIComponent(course.title)}&credits=${course.credits}`
@@ -99,6 +112,8 @@ export default function CourseDetailPage() {
     );
   }
 
+  const courseContent = getCourseContent(course);
+
   return (
     <div className="relative min-h-[calc(100vh-80px)] overflow-hidden bg-black pb-20 text-white">
       {/* Background Glow */}
@@ -122,6 +137,7 @@ export default function CourseDetailPage() {
               <h1 className="mb-4 text-4xl font-black tracking-tight text-white uppercase transition-colors group-hover:text-red-50 md:text-5xl">
                 {course.title}
               </h1>
+              <p className="max-w-3xl text-base leading-8 text-gray-400">{courseContent.summary}</p>
               <div className="flex flex-wrap items-center gap-6 font-mono text-sm tracking-wider text-gray-400 uppercase">
                 <span className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-gray-600"></span>
@@ -130,6 +146,14 @@ export default function CourseDetailPage() {
                 <span className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-red-600"></span>
                   Payload: <span className="text-white">{course.credits} UNIT</span>
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+                  Level: <span className="text-white">{courseContent.level}</span>
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-blue-500"></span>
+                  Duration: <span className="text-white">{courseContent.duration}</span>
                 </span>
               </div>
             </div>
@@ -156,73 +180,83 @@ export default function CourseDetailPage() {
                   Execution Objectives
                 </h3>
                 <ul className="space-y-4">
-                  <li className="flex items-start gap-4 text-gray-400">
-                    <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded border border-red-500/20 bg-red-500/10">
-                      <svg
-                        className="h-3 w-3 text-red-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={3}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <span>Mastery of core decentralized computing paradigms</span>
-                  </li>
-                  <li className="flex items-start gap-4 text-gray-400">
-                    <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded border border-red-500/20 bg-red-500/10">
-                      <svg
-                        className="h-3 w-3 text-red-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={3}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <span>Direct compilation and deployment of Soroban contracts</span>
-                  </li>
-                  <li className="flex items-start gap-4 text-gray-400">
-                    <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded border border-red-500/20 bg-red-500/10">
-                      <svg
-                        className="h-3 w-3 text-red-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={3}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <span>Secure state manipulation on the Stellar testnet</span>
-                  </li>
+                  {courseContent.outcomes.map((outcome) => (
+                    <li key={outcome} className="flex items-start gap-4 text-gray-400">
+                      <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded border border-red-500/20 bg-red-500/10">
+                        <svg
+                          className="h-3 w-3 text-red-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={3}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                      <span>{outcome}</span>
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>
 
-            {/* Dummy Video Player Space */}
-            <div className="group relative flex aspect-video flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black">
-              <div className="absolute inset-0 z-0 bg-red-600/5 transition-colors group-hover:bg-red-600/10"></div>
-              <div className="z-10 mb-4 flex h-20 w-20 cursor-pointer items-center justify-center rounded-full border border-red-500/30 bg-zinc-900 shadow-[0_0_30px_rgba(220,38,38,0.2)] transition-transform group-hover:scale-110">
-                <div className="ml-2 h-0 w-0 border-t-[12px] border-b-[12px] border-l-[20px] border-t-transparent border-b-transparent border-l-red-500"></div>
+            <div className="rounded-2xl border border-white/10 bg-zinc-950 p-8">
+              <h2 className="mb-6 flex items-center gap-3 text-2xl font-black tracking-widest text-white uppercase">
+                <span className="inline-block h-4 w-4 rounded-sm bg-emerald-500"></span> Curriculum
+                Map
+              </h2>
+              <div className="grid gap-4 md:grid-cols-3">
+                {courseContent.modules.map((module, index) => (
+                  <div
+                    key={module.title}
+                    className="rounded-2xl border border-white/8 bg-white/4 p-5"
+                  >
+                    <p className="mb-3 text-xs font-bold tracking-[0.18em] text-red-400 uppercase">
+                      Module {index + 1}
+                    </p>
+                    <h3 className="text-lg font-semibold text-white">{module.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-gray-400">{module.description}</p>
+                  </div>
+                ))}
               </div>
-              <p className="z-10 font-mono text-sm tracking-widest text-gray-500 uppercase">
-                Stream Encrypted Feed
-              </p>
+            </div>
+
+            <div className="grid gap-8 md:grid-cols-2">
+              <div className="rounded-2xl border border-white/10 bg-zinc-950 p-8">
+                <h2 className="mb-6 text-xl font-black tracking-widest text-white uppercase">
+                  Deliverables
+                </h2>
+                <div className="space-y-4">
+                  {courseContent.deliverables.map((deliverable) => (
+                    <div
+                      key={deliverable}
+                      className="rounded-xl border border-white/8 bg-white/4 px-4 py-4 text-sm text-gray-300"
+                    >
+                      {deliverable}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-zinc-950 p-8">
+                <h2 className="mb-6 text-xl font-black tracking-widest text-white uppercase">
+                  Tools You Will Touch
+                </h2>
+                <div className="flex flex-wrap gap-3">
+                  {courseContent.tools.map((tool) => (
+                    <span
+                      key={tool}
+                      className="rounded-full border border-red-500/20 bg-red-500/10 px-4 py-2 text-xs font-bold tracking-[0.14em] text-red-300 uppercase"
+                    >
+                      {tool}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -293,18 +327,29 @@ export default function CourseDetailPage() {
                 <div>
                   <button
                     onClick={handleEnroll}
-                    disabled={!user}
+                    disabled={isAuthLoading}
                     className={`w-full rounded-xl py-5 font-black tracking-widest uppercase transition-all ${
-                      !user
-                        ? 'cursor-not-allowed border border-white/10 bg-gray-800 text-gray-500'
+                      isAuthLoading
+                        ? 'cursor-wait border border-white/10 bg-gray-800 text-gray-500'
                         : 'transform bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:-translate-y-0.5 hover:bg-gray-200'
                     }`}
                   >
-                    {!user ? 'Auth Required' : 'Start Enrollment'}
+                    {isAuthLoading
+                      ? 'Checking session...'
+                      : !publicKey
+                        ? 'Connect Wallet'
+                        : !user
+                          ? 'Complete Profile'
+                          : 'Start Enrollment'}
                   </button>
                   <p className="mt-4 text-center font-mono text-xs text-gray-500">
                     5-step wizard with progress saving
                   </p>
+                  {!isAuthLoading && !user && publicKey && (
+                    <p className="mt-2 text-center text-xs text-red-400">
+                      Finish your profile once, then enrollment will stay available.
+                    </p>
+                  )}
                   <p className="mt-2 text-center font-mono text-xs text-gray-600">
                     NO GAS FEES • PUBLIC TESTNET
                   </p>

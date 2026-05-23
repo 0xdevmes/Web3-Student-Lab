@@ -17,6 +17,12 @@ interface Step3GoalsProps {
 export function Step3Goals({ data, onUpdate, errors }: Step3GoalsProps) {
   const toggleObjective = (objective: string) => {
     const current = data.objectives;
+    const isSelected = current.includes(objective);
+
+    if (!isSelected && current.length >= 5) {
+      return;
+    }
+
     const updated = current.includes(objective)
       ? current.filter((o) => o !== objective)
       : [...current, objective];
@@ -25,6 +31,12 @@ export function Step3Goals({ data, onUpdate, errors }: Step3GoalsProps) {
 
   const toggleMilestone = (milestone: string) => {
     const current = data.milestones;
+    const isSelected = current.includes(milestone);
+
+    if (!isSelected && current.length >= 4) {
+      return;
+    }
+
     const updated = current.includes(milestone)
       ? current.filter((m) => m !== milestone)
       : [...current, milestone];
@@ -69,19 +81,25 @@ export function Step3Goals({ data, onUpdate, errors }: Step3GoalsProps) {
           </span>
           Learning Objectives
         </h3>
-        <p className="text-sm text-zinc-400">Select what you want to achieve (max 5)</p>
+        <p className="text-sm text-zinc-400">
+          Select what you want to achieve ({data.objectives.length}/5 selected)
+        </p>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {LEARNING_OBJECTIVES.map((objective) => {
             const isSelected = data.objectives.includes(objective);
+            const isDisabled = !isSelected && data.objectives.length >= 5;
             return (
               <motion.button
                 key={objective}
                 onClick={() => toggleObjective(objective)}
                 whileTap={{ scale: 0.98 }}
+                disabled={isDisabled}
                 className={`rounded-lg border p-3 text-left text-sm transition-all ${
                   isSelected
                     ? 'border-red-500 bg-red-500/10 text-white'
-                    : 'border-zinc-700 bg-zinc-900/50 text-zinc-400 hover:border-zinc-600'
+                    : isDisabled
+                      ? 'cursor-not-allowed border-zinc-800 bg-zinc-900/40 text-zinc-600'
+                      : 'border-zinc-700 bg-zinc-900/50 text-zinc-400 hover:border-zinc-600'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -180,19 +198,25 @@ export function Step3Goals({ data, onUpdate, errors }: Step3GoalsProps) {
           </span>
           Milestones
         </h3>
-        <p className="text-sm text-zinc-400">Set your key achievement markers (max 4)</p>
+        <p className="text-sm text-zinc-400">
+          Set your key achievement markers ({data.milestones.length}/4 selected)
+        </p>
         <div className="space-y-2">
           {MILESTONE_OPTIONS.map((milestone) => {
             const isSelected = data.milestones.includes(milestone);
+            const isDisabled = !isSelected && data.milestones.length >= 4;
             return (
               <motion.button
                 key={milestone}
                 onClick={() => toggleMilestone(milestone)}
                 whileTap={{ scale: 0.98 }}
+                disabled={isDisabled}
                 className={`w-full rounded-lg border p-3 text-left transition-all ${
                   isSelected
                     ? 'border-red-500 bg-red-500/10 text-white'
-                    : 'border-zinc-700 bg-zinc-900/50 text-zinc-400 hover:border-zinc-600'
+                    : isDisabled
+                      ? 'cursor-not-allowed border-zinc-800 bg-zinc-900/40 text-zinc-600'
+                      : 'border-zinc-700 bg-zinc-900/50 text-zinc-400 hover:border-zinc-600'
                 }`}
               >
                 <div className="flex items-center gap-3">

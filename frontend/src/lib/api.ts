@@ -1,12 +1,13 @@
 import apiClient from './api-client';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+import { API_BASE_URL } from './api-config';
+import { apiRequestCache } from './api-cache';
 
 export interface User {
   id: string;
   email: string;
   name: string;
   address?: string;
+  walletAddress?: string | null;
 }
 
 export interface AuthResponse {
@@ -24,6 +25,7 @@ export interface RegisterRequest {
   password: string;
   firstName: string;
   lastName: string;
+  walletAddress?: string;
 }
 
 export interface Course {
@@ -93,6 +95,25 @@ export interface ExportSseMessage {
   timestamp?: string;
 }
 
+const DEFAULT_CACHE_TTL_MS = 15_000;
+
+function normalizeCertificateListResponse(data: unknown): Certificate[] {
+  if (Array.isArray(data)) {
+    return data as Certificate[];
+  }
+
+  if (
+    data &&
+    typeof data === 'object' &&
+    'certificates' in data &&
+    Array.isArray((data as { certificates?: unknown }).certificates)
+  ) {
+    return (data as { certificates: Certificate[] }).certificates;
+  }
+
+  return [];
+}
+
 // Authentication APIs
 export const authAPI = {
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
@@ -106,62 +127,128 @@ export const authAPI = {
   },
 
   getCurrentUser: async (): Promise<User> => {
-    const response = await apiClient.get('/auth/me');
-    return response.data.user;
+    return apiRequestCache.fetch(
+      'auth:me',
+      async () => {
+        const response = await apiClient.get('/auth/me');
+        return response.data.user;
+      },
+      { ttlMs: 10_000 }
+    );
+  },
+
+  getProfileStatus: async (
+    walletAddress: string
+  ): Promise<{ completed: boolean; user: User | null }> => {
+    return apiRequestCache.fetch(
+      `auth:profile-status:${walletAddress}`,
+      async () => {
+        const response = await apiClient.get('/auth/profile-status', {
+          params: { walletAddress },
+        });
+        return response.data;
+      },
+      { ttlMs: DEFAULT_CACHE_TTL_MS }
+    );
   },
 };
 
 // Courses APIs
 export const coursesAPI = {
   getAll: async (): Promise<Course[]> => {
-    const response = await apiClient.get('/courses');
-    return response.data;
+    return apiRequestCache.fetch(
+      'courses:list',
+      async () => {
+        const response = await apiClient.get('/courses');
+        return response.data;
+      },
+      { ttlMs: DEFAULT_CACHE_TTL_MS }
+    );
   },
 
   getById: async (id: string): Promise<Course> => {
-    const response = await apiClient.get(`/courses/${id}`);
-    return response.data;
+    return apiRequestCache.fetch(
+      `courses:detail:${id}`,
+      async () => {
+        const response = await apiClient.get(`/courses/${id}`);
+        return response.data;
+      },
+      { ttlMs: DEFAULT_CACHE_TTL_MS }
+    );
   },
 
   create: async (data: Partial<Course>): Promise<Course> => {
     const response = await apiClient.post('/courses', data);
+    apiRequestCache.invalidatePrefix('courses:');
     return response.data;
   },
 
   update: async (id: string, data: Partial<Course>): Promise<Course> => {
     const response = await apiClient.put(`/courses/${id}`, data);
+    apiRequestCache.invalidate('courses:list');
+    apiRequestCache.invalidate(`courses:detail:${id}`);
     return response.data;
   },
 
   delete: async (id: string): Promise<void> => {
     await apiClient.delete(`/courses/${id}`);
+    apiRequestCache.invalidate('courses:list');
+    apiRequestCache.invalidate(`courses:detail:${id}`);
   },
 };
 
 // Certificates APIs
 export const certificatesAPI = {
-  issue: async (data: { studentId: string; courseId: string }): Promise<Certificate> => {
+  issue: async (data: {
+    studentId: string;
+    courseId: string;
+  }): Promise<{ success: boolean; certificate: Certificate; metadata?: unknown }> => {
     const response = await apiClient.post('/certificates', data);
     return response.data;
   },
 
   getAll: async (): Promise<Certificate[]> => {
-    const response = await apiClient.get('/certificates');
-    return response.data;
+    return apiRequestCache.fetch(
+      'certificates:list',
+      async () => {
+        const response = await apiClient.get('/certificates');
+        return response.data;
+      },
+      { ttlMs: DEFAULT_CACHE_TTL_MS }
+    );
   },
 
   getByStudentId: async (studentId: string): Promise<Certificate[]> => {
-    const response = await apiClient.get(`/certificates/student/${studentId}`);
-    return response.data;
+    return apiRequestCache.fetch(
+      `certificates:student:${studentId}`,
+      async () => {
+        const response = await apiClient.get(`/certificates/student/${studentId}`);
+        return normalizeCertificateListResponse(response.data);
+      },
+      { ttlMs: DEFAULT_CACHE_TTL_MS }
+    );
   },
 
   getById: async (id: string): Promise<Certificate> => {
-    const response = await apiClient.get(`/certificates/${id}`);
-    return response.data;
+    return apiRequestCache.fetch(
+      `certificates:detail:${id}`,
+      async () => {
+        const response = await apiClient.get(`/certificates/${id}`);
+        return response.data as Certificate;
+      },
+      { ttlMs: DEFAULT_CACHE_TTL_MS }
+    );
   },
 
-  verifyOnChain: async (certificateId: string): Promise<{ verified: boolean; hash?: string }> => {
-    const response = await apiClient.get(`/certificates/${certificateId}/verify`);
+  verifyOnChain: async (
+    tokenId: string
+  ): Promise<{
+    isValid: boolean;
+    certificate?: unknown;
+    onChainData?: unknown;
+    message?: string;
+  }> => {
+    const response = await apiClient.get(`/certificates/verify/${tokenId}`);
     return response.data;
   },
 };
@@ -169,13 +256,25 @@ export const certificatesAPI = {
 // Enrollments APIs
 export const enrollmentsAPI = {
   getAll: async (): Promise<Enrollment[]> => {
-    const response = await apiClient.get('/enrollments');
-    return response.data;
+    return apiRequestCache.fetch(
+      'enrollments:list',
+      async () => {
+        const response = await apiClient.get('/enrollments');
+        return response.data;
+      },
+      { ttlMs: DEFAULT_CACHE_TTL_MS }
+    );
   },
 
   getByStudentId: async (studentId: string): Promise<Enrollment[]> => {
-    const response = await apiClient.get(`/enrollments/student/${studentId}`);
-    return response.data;
+    return apiRequestCache.fetch(
+      `enrollments:student:${studentId}`,
+      async () => {
+        const response = await apiClient.get(`/enrollments/student/${studentId}`);
+        return response.data;
+      },
+      { ttlMs: DEFAULT_CACHE_TTL_MS }
+    );
   },
 
   enroll: async (studentId: string, courseId: string): Promise<Enrollment> => {
@@ -183,11 +282,14 @@ export const enrollmentsAPI = {
       studentId,
       courseId,
     });
+    apiRequestCache.invalidate('enrollments:list');
+    apiRequestCache.invalidate(`enrollments:student:${studentId}`);
     return response.data;
   },
 
   updateStatus: async (id: string, status: string): Promise<Enrollment> => {
     const response = await apiClient.put(`/enrollments/${id}`, { status });
+    apiRequestCache.invalidatePrefix('enrollments:');
     return response.data;
   },
 };

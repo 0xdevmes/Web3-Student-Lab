@@ -2,6 +2,8 @@
 
 import { EnrollmentWizard } from '@/components/enrollment/EnrollmentWizard';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNotifications } from '@/contexts/NotificationContext';
+import { useWallet } from '@/contexts/WalletContext';
 import { enrollmentsAPI } from '@/lib/api';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -11,6 +13,8 @@ function EnrollmentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user } = useAuth();
+  const { publicKey } = useWallet();
+  const { push } = useNotifications();
 
   const [courseId, setCourseId] = useState<string | undefined>();
   const [courseTitle, setCourseTitle] = useState<string | undefined>();
@@ -39,13 +43,18 @@ function EnrollmentContent() {
           setCompletedCourses(completed);
         } catch (error) {
           console.error('Failed to load user enrollments:', error);
+          push({
+            type: 'error',
+            title: 'Could not load enrollments',
+            message: 'We could not fetch your existing course history. You can still continue.',
+          });
         }
       }
       setIsLoading(false);
     }
 
     loadUserData();
-  }, [searchParams, user]);
+  }, [searchParams, user, push]);
 
   const handleComplete = () => {
     router.push('/dashboard');
@@ -68,7 +77,7 @@ function EnrollmentContent() {
     );
   }
 
-  if (!user) {
+  if (!publicKey) {
     return (
       <div className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-black">
         <div className="mx-4 max-w-md rounded-2xl border border-red-500/50 bg-zinc-950 p-12 text-center">
@@ -88,16 +97,54 @@ function EnrollmentContent() {
             </svg>
           </div>
           <h2 className="mb-4 text-2xl font-black tracking-widest text-white uppercase">
-            Authentication Required
+            Wallet Connection Required
           </h2>
           <p className="mb-8 text-zinc-400">
-            Please sign in to enroll in courses and track your progress.
+            Connect your wallet before starting enrollment. We can collect or match learner details
+            after that step.
           </p>
           <Link
             href="/auth/login"
             className="inline-flex items-center justify-center rounded-lg bg-red-600 px-8 py-4 font-bold tracking-wider text-white uppercase transition-colors hover:bg-red-700"
           >
-            Sign In
+            Connect Wallet
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-black">
+        <div className="mx-4 max-w-md rounded-2xl border border-amber-500/40 bg-zinc-950 p-12 text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-amber-500/10">
+            <svg
+              className="h-8 w-8 text-amber-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"
+              />
+            </svg>
+          </div>
+          <h2 className="mb-4 text-2xl font-black tracking-widest text-white uppercase">
+            Profile Setup Required
+          </h2>
+          <p className="mb-8 text-zinc-400">
+            Your wallet is connected, but your learner profile has not been completed yet. The
+            backend cannot create an enrollment until your student record exists.
+          </p>
+          <Link
+            href="/auth/register"
+            className="inline-flex items-center justify-center rounded-lg bg-red-600 px-8 py-4 font-bold tracking-wider text-white uppercase transition-colors hover:bg-red-700"
+          >
+            Complete Profile
           </Link>
         </div>
       </div>
@@ -139,6 +186,7 @@ function EnrollmentContent() {
         </div>
 
         <EnrollmentWizard
+          studentId={user.id}
           initialCourseId={courseId}
           initialCourseTitle={courseTitle}
           initialCourseCredits={courseCredits}

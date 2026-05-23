@@ -8,6 +8,8 @@ interface RateLimitOptions {
   keyPrefix: string;
 }
 
+type ResolvedRateLimitConfig = RateLimitOptions;
+
 export const slidingWindowRateLimiter = (options: RateLimitOptions) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
@@ -70,13 +72,43 @@ export const apiRateLimiter = async (req: Request, res: Response, next: NextFunc
   if (process.env.NODE_ENV === 'test') {
     return next();
   }
-  const isAuth = !!(req as any).user;
-  const limit = isAuth ? 50 : 10; // 50 req/s for auth, 10 req/s for unauth
-  const windowMs = 1000; // 1 second window
 
-  return slidingWindowRateLimiter({
-    windowMs,
-    limit,
-    keyPrefix: 'rl:api',
-  })(req, res, next);
+  return slidingWindowRateLimiter(resolveApiRateLimit(req))(req, res, next);
 };
+
+function resolveApiRateLimit(req: Request): ResolvedRateLimitConfig {
+  const isAuth = !!(req as any).user;
+  const baseConfig: ResolvedRateLimitConfig = {
+    windowMs: 1000,
+    limit: isAuth ? 80 : 20,
+    keyPrefix: 'rl:api',
+  };
+
+  if (req.method !== 'GET') {
+    return baseConfig;
+  }
+
+  const path = req.path;
+
+  if (path.startsWith('/api/v1/auth/profile-status')) {
+    return {
+      windowMs: 1000,
+      limit: 30,
+      keyPrefix: 'rl:api:profile-status',
+    };
+  }
+
+  if (
+    path.startsWith('/api/v1/certificates') ||
+    path.startsWith('/api/v1/enrollments') ||
+    path.startsWith('/api/v1/courses')
+  ) {
+    return {
+      windowMs: 1000,
+      limit: isAuth ? 120 : 40,
+      keyPrefix: 'rl:api:read-heavy',
+    };
+  }
+
+  return baseConfig;
+}

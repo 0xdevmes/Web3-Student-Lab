@@ -139,13 +139,17 @@ export default function CertificatesVaultPage() {
                     Web3 Lab Identity
                   </span>
                   <div className="flex items-center gap-3">
-                    <Link
-                      href={`/certificates/generate?id=${cert.id}`}
-                      onClick={(e) => e.stopPropagation()}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        router.push(`/certificates/generate?id=${cert.id}`);
+                      }}
                       className="text-xs font-bold tracking-widest text-red-600 uppercase transition-colors hover:text-red-400"
                     >
                       Download ↓
-                    </Link>
+                    </button>
                     <span className="flex items-center gap-1 text-xs font-bold tracking-widest text-red-500 uppercase group-hover:text-red-400">
                       Inspect{' '}
                       <span className="transform transition-transform group-hover:translate-x-1">

@@ -2,23 +2,12 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { WalletProvider } from '@/contexts/WalletContext';
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
-
 export const metadata: Metadata = {
-  title: 'Web3 Student Lab - Blockchain Education Platform',
+  title: 'Web3 Student Lab',
   description:
-    'Learn blockchain development with hands-on experience using Soroban smart contracts and Stellar blockchain',
+    'An open-source educational platform for blockchain, smart contracts, open-source collaboration, and hackathon project development.',
 };
 
 import Navbar from '@/components/layout/Navbar';
@@ -53,9 +42,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} bg-background text-foreground min-h-screen antialiased transition-colors duration-200`}
-      >
+      <body className="bg-background text-foreground min-h-screen antialiased">
         <ThemeProvider>
           <WalletProvider>
             <AuthProvider>

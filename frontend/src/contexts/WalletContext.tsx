@@ -1,5 +1,11 @@
 'use client';
 
+import {
+  getAddress as getFreighterAddress,
+  isConnected as isFreighterConnected,
+  requestAccess as requestFreighterAccess,
+  signTransaction as signFreighterTransaction,
+} from '@stellar/freighter-api';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 // ─── Wallet Interface ─────────────────────────────────────────────────────────
@@ -24,6 +30,18 @@ declare global {
       getPublicKey: () => Promise<string>;
       signTransaction: (xdr: string, opts?: object) => Promise<string>;
     };
+    freighterApi?: {
+      isConnected?: () => Promise<boolean>;
+      getPublicKey: () => Promise<string>;
+      signTransaction: (xdr: string, opts?: object) => Promise<string>;
+    };
+    stellar?: {
+      freighter?: {
+        isConnected?: () => Promise<boolean>;
+        getPublicKey: () => Promise<string>;
+        signTransaction: (xdr: string, opts?: object) => Promise<string>;
+      };
+    };
     albedo?: {
       publicKey: (opts?: object) => Promise<{ pubkey: string }>;
       tx: (opts: { xdr: string; network: string }) => Promise<{ signed_envelope_xdr: string }>;
@@ -38,23 +56,44 @@ declare global {
 const freighterAdapter: WalletProvider = {
   name: 'Freighter',
   icon: '🚀',
-  isInstalled: () => typeof window !== 'undefined' && !!window.freighter,
+  isInstalled: () =>
+    typeof window !== 'undefined' &&
+    (!!window.freighter || !!window.freighterApi || !!window.stellar?.freighter),
   connect: async () => {
-    if (!window.freighter) throw new Error('Freighter not installed');
-    return window.freighter.getPublicKey();
+    const connection = await isFreighterConnected();
+    if (connection.error) {
+      throw new Error(connection.error);
+    }
+
+    if (!connection.isConnected) {
+      throw new Error(
+        'Freighter is not available to this page yet. Refresh the page and make sure the extension is enabled for this site.'
+      );
+    }
+
+    const access = await requestFreighterAccess();
+    if (access.error || !access.address) {
+      throw new Error(access.error || 'Freighter did not return an address');
+    }
+
+    return access.address;
   },
   disconnect: async () => {},
   getPublicKey: async () => {
-    if (!window.freighter) return null;
-    try {
-      return await window.freighter.getPublicKey();
-    } catch {
+    const address = await getFreighterAddress();
+    if (address.error || !address.address) {
       return null;
     }
+
+    return address.address;
   },
   signTransaction: async (xdr: string) => {
-    if (!window.freighter) throw new Error('Freighter not installed');
-    return window.freighter.signTransaction(xdr, { network: 'TESTNET' });
+    const result = await signFreighterTransaction(xdr);
+    if (result.error || !result.signedTxXdr) {
+      throw new Error(result.error || 'Freighter could not sign the transaction');
+    }
+
+    return result.signedTxXdr;
   },
 };
 

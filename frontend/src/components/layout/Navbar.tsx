@@ -1,10 +1,11 @@
 'use client';
 
-import { LanguageSelector } from '@/components/common/LanguageSelector';
 import NotificationBell from '@/components/notifications/NotificationBell';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePrefetch } from '@/hooks/usePrefetch';
-import { useI18n } from '@/i18n';
+import { useWallet } from '@/contexts/WalletContext';
+import { useWalletProfileCompletion } from '@/lib/profile-completion';
+import { primaryNav } from '@/lib/site-data';
+import { ArrowRight, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -12,277 +13,162 @@ import { useState } from 'react';
 export default function Navbar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const { t } = useI18n();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { handleMouseEnter, handleMouseLeave } = usePrefetch();
+  const { publicKey } = useWallet();
+  const [open, setOpen] = useState(false);
+  const completedProfile = useWalletProfileCompletion(publicKey);
+  const profileCompleted = !!completedProfile;
 
-  const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/');
-
-  const navLinks = [
-    { name: 'MODULES', path: '/courses' },
-    { name: 'ROADMAP', path: '/roadmap' },
-    { name: 'QUIZ', path: '/quiz' },
-    { name: 'PLAYGROUND', path: '/playground' },
-    { name: 'REVIEWS', path: '/peer-review' },
-    { name: 'SIMULATOR', path: '/simulator' },
-    { name: 'IDEAS', path: '/ideas' },
-    { name: 'VERIFY', path: '/verify' },
-    { name: 'AIRDROP', path: '/airdrop' },
-    { name: 'JOURNAL', path: '/blog' },
-    { name: 'DEVTOOLS', path: '/devtools/events' },
-    { name: t('nav.modules'), path: '/courses' },
-    { name: t('nav.roadmap'), path: '/roadmap' },
-    { name: t('nav.quiz'), path: '/quiz' },
-    { name: t('nav.playground'), path: '/playground' },
-    { name: t('nav.reviews'), path: '/peer-review' },
-    { name: t('nav.simulator'), path: '/simulator' },
-    { name: t('nav.ideas'), path: '/ideas' },
-    { name: t('nav.verify'), path: '/verify' },
-    { name: t('nav.subscriptions'), path: '/subscriptions' },
-    { name: t('nav.notarization'), path: '/notarization' },
-    { name: t('nav.devtools'), path: '/devtools/events' },
-  ];
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <nav
-      className="sticky top-0 z-50 w-full border-b border-white/10 bg-black/80 backdrop-blur-md"
-      aria-label="Main navigation"
-    >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[rgba(10,13,20,0.78)] backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-4 sm:px-6 lg:px-8">
+        <Link href="/" className="group flex items-center gap-3" onClick={() => setOpen(false)}>
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/15 bg-[linear-gradient(145deg,#ff7849,#d8481f)] text-sm font-black tracking-[0.3em] text-white shadow-[0_16px_40px_rgba(216,72,31,0.28)]">
+            W3
+          </div>
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-[var(--muted)]">
+              Open Source Lab
+            </p>
+            <p className="text-base font-semibold tracking-tight text-[var(--text-strong)]">
+              Web3 Student Lab
+            </p>
+          </div>
+        </Link>
+
+        <nav className="hidden items-center gap-2 lg:flex" aria-label="Primary">
+          {primaryNav.map((item) => (
             <Link
-              href="/"
-              className="group flex items-center gap-3"
-              aria-label="Web3 Lab - Go to homepage"
-            >
-              <div
-                className="flex h-10 w-10 transform items-center justify-center rounded-lg bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-transform duration-300 group-hover:rotate-12"
-                aria-hidden="true"
-              >
-                <svg
-                  className="h-6 w-6 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                  focusable="false"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                  />
-                </svg>
-              </div>
-              <span className="text-2xl font-black tracking-widest text-white uppercase">
-                Web3 <span className="text-red-600">Lab</span>
-              </span>
-            </Link>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div
-            className="hidden items-center gap-6 xl:flex"
-            role="menubar"
-            aria-label="Site navigation"
-          >
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                href={link.path}
-                role="menuitem"
-                onMouseEnter={() => handleMouseEnter(link.path)}
-                onMouseLeave={handleMouseLeave}
-                aria-current={isActive(link.path) ? 'page' : undefined}
-                className={`text-[10px] font-black tracking-[0.2em] uppercase transition-colors ${
-                  isActive(link.path) ? 'text-red-500' : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-          </div>
-
-          <div className="hidden items-center gap-4 md:flex">
-            <LanguageSelector />
-            {user ? (
-              <div className="flex items-center gap-4">
-                <Link
-                  href="/dashboard"
-                  onMouseEnter={() => handleMouseEnter('/dashboard')}
-                  onMouseLeave={handleMouseLeave}
-                  aria-current={isActive('/dashboard') ? 'page' : undefined}
-                  className={`rounded border px-4 py-2 text-[10px] font-black tracking-[0.2em] uppercase transition-all ${
-                    isActive('/dashboard')
-                      ? 'border-red-500 bg-red-600 text-white shadow-[0_0_15px_rgba(220,38,38,0.4)]'
-                      : 'border-white/10 text-gray-400 hover:border-red-500/50 hover:text-white'
-                  }`}
-                >
-                  DASHBOARD
-                </Link>
-                <Link
-                  href="/certificates"
-                  onMouseEnter={() => handleMouseEnter('/certificates')}
-                  onMouseLeave={handleMouseLeave}
-                  aria-current={isActive('/certificates') ? 'page' : undefined}
-                  className={`rounded border px-4 py-2 text-[10px] font-black tracking-[0.2em] uppercase transition-all ${
-                    isActive('/certificates')
-                      ? 'border-red-500 bg-red-600 text-white shadow-[0_0_15px_rgba(220,38,38,0.4)]'
-                      : 'border-white/10 text-gray-400 hover:border-red-500/50 hover:text-white'
-                  }`}
-                >
-                  VAULT
-                </Link>
-                <NotificationBell />
-                <button
-                  onClick={logout}
-                  aria-label="Logout from your account"
-                  className="group flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-zinc-900 transition-colors hover:border-red-500/50"
-                >
-                  <svg
-                    className="h-5 w-5 text-gray-500 transition-colors group-hover:text-red-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                    />
-                  </svg>
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-4">
-                <Link
-                  href="/auth/login"
-                  className="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase transition-colors hover:text-white"
-                >
-                  SIGN IN
-                </Link>
-                <Link
-                  href="/auth/register"
-                  className="rounded border border-red-500 bg-red-600 px-6 py-2.5 text-[10px] font-black tracking-[0.2em] text-white uppercase shadow-[0_0_15px_rgba(220,38,38,0.4)] transition-all hover:bg-red-700 hover:shadow-[0_0_25px_rgba(220,38,38,0.6)]"
-                >
-                  INITIALIZE
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="flex items-center xl:hidden">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-expanded={isMobileMenuOpen}
-              aria-controls="mobile-menu"
-              aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-              className="rounded text-gray-300 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-            >
-              <svg
-                className="h-8 w-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                focusable="false"
-              >
-                {isMobileMenuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                )}
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Menu Panel */}
-      {isMobileMenuOpen && (
-        <div
-          id="mobile-menu"
-          className="space-y-2 border-b border-white/10 bg-black px-4 pt-2 pb-6 shadow-2xl xl:hidden"
-          role="menu"
-          aria-label="Mobile navigation"
-        >
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              href={link.path}
-              role="menuitem"
-              aria-current={isActive(link.path) ? 'page' : undefined}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={`block rounded-md px-3 py-3 text-sm font-black tracking-widest uppercase transition-colors ${
-                isActive(link.path)
-                  ? 'bg-red-500/10 text-red-500'
-                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+              key={item.href}
+              href={item.href}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                isActive(item.href)
+                  ? 'bg-white text-slate-950'
+                  : 'text-[var(--muted)] hover:bg-white/8 hover:text-[var(--text-strong)]'
               }`}
             >
-              {link.name}
+              {item.label}
             </Link>
           ))}
-          <div className="my-2 h-px w-full bg-white/10" role="separator"></div>
+        </nav>
+
+        <div className="hidden items-center gap-3 lg:flex">
           {user ? (
             <>
+              <NotificationBell />
               <Link
-                href="/dashboard"
-                role="menuitem"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block rounded-md bg-red-600 px-3 py-3 text-sm font-black tracking-widest text-white uppercase"
+                href="/certificates"
+                className="rounded-full border border-white/12 px-4 py-2 text-sm font-medium text-[var(--text-strong)] transition hover:border-[var(--brand)] hover:bg-white/5"
               >
-                Dashboard
+                Certificates
               </Link>
               <button
-                onClick={() => {
-                  logout();
-                  setIsMobileMenuOpen(false);
-                }}
-                role="menuitem"
-                className="block w-full rounded-md px-3 py-3 text-left text-sm font-black tracking-widest text-red-500 uppercase hover:bg-red-500/10"
+                onClick={logout}
+                className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-[var(--brand-soft)]"
               >
-                Logout
+                Sign out
               </button>
             </>
           ) : (
             <>
               <Link
                 href="/auth/login"
-                role="menuitem"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block px-3 py-3 text-sm font-black tracking-widest text-gray-400 uppercase hover:text-white"
+                className="rounded-full px-4 py-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--text-strong)]"
               >
-                Sign In
+                {publicKey ? 'Wallet connected' : 'Connect wallet'}
               </Link>
               <Link
-                href="/auth/register"
-                role="menuitem"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block px-3 py-3 text-sm font-black tracking-widest text-red-500 uppercase hover:text-red-400"
+                href={profileCompleted ? '/auth/login' : '/auth/register'}
+                className="inline-flex items-center gap-2 rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(216,72,31,0.28)] transition hover:translate-y-[-1px] hover:bg-[var(--brand-strong)]"
               >
-                Initialize
+                {publicKey
+                  ? profileCompleted
+                    ? 'Open wallet access'
+                    : 'Complete profile'
+                  : 'Start with wallet'}
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </>
           )}
         </div>
+
+        <button
+          type="button"
+          onClick={() => setOpen((value) => !value)}
+          className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 text-[var(--text-strong)] lg:hidden"
+          aria-expanded={open}
+          aria-label={open ? 'Close menu' : 'Open menu'}
+        >
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+      </div>
+
+      {open && (
+        <div className="border-t border-white/10 bg-[rgba(8,10,16,0.96)] lg:hidden">
+          <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 sm:px-6">
+            {primaryNav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className={`rounded-2xl px-4 py-3 ${
+                  isActive(item.href)
+                    ? 'bg-white text-slate-950'
+                    : 'bg-white/4 text-[var(--text-strong)]'
+                }`}
+              >
+                <span className="block text-sm font-semibold">{item.label}</span>
+                <span className="mt-1 block text-xs text-inherit/75">{item.description}</span>
+              </Link>
+            ))}
+
+            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {user ? (
+                <>
+                  <Link
+                    href="/certificates"
+                    onClick={() => setOpen(false)}
+                    className="rounded-2xl border border-white/12 px-4 py-3 text-sm font-medium text-[var(--text-strong)]"
+                  >
+                    Certificates
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setOpen(false);
+                    }}
+                    className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950"
+                  >
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/auth/login"
+                    onClick={() => setOpen(false)}
+                    className="rounded-2xl border border-white/12 px-4 py-3 text-sm font-medium text-[var(--text-strong)]"
+                  >
+                    {publicKey ? 'Wallet connected' : 'Connect wallet'}
+                  </Link>
+                  <Link
+                    href={profileCompleted ? '/auth/login' : '/auth/register'}
+                    onClick={() => setOpen(false)}
+                    className="rounded-2xl bg-[var(--brand)] px-4 py-3 text-sm font-semibold text-white"
+                  >
+                    {publicKey
+                      ? profileCompleted
+                        ? 'Open wallet access'
+                        : 'Complete profile'
+                      : 'Start with wallet'}
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
-    </nav>
+    </header>
   );
 }

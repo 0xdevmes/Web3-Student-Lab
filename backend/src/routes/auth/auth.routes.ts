@@ -1,6 +1,6 @@
 import { Request, Response, Router } from 'express';
 import { authenticate } from '../../auth/auth.middleware.js';
-import { login, register } from '../../auth/auth.service.js';
+import { getProfileStatusByWallet, login, register } from '../../auth/auth.service.js';
 import { blacklistAccessToken, rotateRefreshToken } from '../../auth/token.service.js';
 import { LoginRequest } from '../../auth/types.js';
 import { loginSchema, registerSchema, web3VerifySchema } from '../../auth/validation.schemas.js';
@@ -18,7 +18,7 @@ const router = Router();
 router.post('/register', validateRequest(registerSchema), async (req: Request, res: Response) => {
   try {
     // Request body is already validated by middleware
-    const { email, password, firstName, lastName } = req.body;
+    const { email, password, firstName, lastName, walletAddress } = req.body;
 
     // Register the student
     const authResponse = await register({
@@ -26,15 +26,40 @@ router.post('/register', validateRequest(registerSchema), async (req: Request, r
       password,
       firstName,
       lastName,
+      walletAddress,
     });
 
     res.status(201).json(authResponse);
-  } catch (error) {
-    if (error instanceof Error && error.message === 'Student with this email already exists') {
-      res.status(409).json({ error: error.message });
+  } catch (_error) {
+    if (_error instanceof Error && _error.message === 'Student with this email already exists') {
+      res.status(409).json({ error: _error.message });
+      return;
+    }
+    if (
+      _error instanceof Error &&
+      _error.message === 'This wallet is already linked to another profile'
+    ) {
+      res.status(409).json({ error: _error.message });
       return;
     }
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/profile-status', async (req: Request, res: Response) => {
+  try {
+    const walletAddress =
+      typeof req.query.walletAddress === 'string' ? req.query.walletAddress.trim() : '';
+
+    if (!walletAddress) {
+      res.status(400).json({ error: 'walletAddress is required' });
+      return;
+    }
+
+    const result = await getProfileStatusByWallet(walletAddress);
+    res.json(result);
+  } catch (_error) {
+    res.status(500).json({ error: 'Failed to fetch profile status' });
   }
 });
 
@@ -51,9 +76,9 @@ router.post('/login', validateRequest(loginSchema), async (req: Request, res: Re
     const authResponse = await login({ email, password });
 
     res.json(authResponse);
-  } catch (error) {
-    if (error instanceof Error && error.message === 'Invalid credentials') {
-      res.status(401).json({ error: error.message });
+  } catch (_error) {
+    if (_error instanceof Error && _error.message === 'Invalid credentials') {
+      res.status(401).json({ error: _error.message });
       return;
     }
 
@@ -102,7 +127,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
   try {
     const tokens = await rotateRefreshToken(refreshToken);
     res.json(tokens);
-  } catch (error) {
+  } catch (_error) {
     res.status(401).json({ error: 'Invalid or expired refresh token' });
   }
 });

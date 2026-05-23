@@ -1,5 +1,6 @@
 'use client';
 
+import axios from 'axios';
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEnrollmentWizard } from '@/hooks/useEnrollmentWizard';
@@ -12,29 +13,31 @@ import { Step4Schedule } from './Step4Schedule';
 import { Step5Confirmation } from './Step5Confirmation';
 import { enrollmentsAPI, Enrollment } from '@/lib/api';
 import { CourseWithPrerequisites } from '@/lib/enrollment/types';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 interface EnrollmentWizardProps {
+  studentId?: string;
   initialCourseId?: string;
   initialCourseTitle?: string;
   initialCourseCredits?: number;
   coursePrerequisites?: string[];
   completedCourseIds?: string[];
   onComplete?: (enrollment: Enrollment) => void;
-  onCancel?: () => void;
 }
 
 export function EnrollmentWizard({
+  studentId,
   initialCourseId,
   initialCourseTitle,
   initialCourseCredits,
   coursePrerequisites = [],
   completedCourseIds = [],
   onComplete,
-  onCancel,
 }: EnrollmentWizardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [showResumePrompt, setShowResumePrompt] = useState(false);
+  const { push } = useNotifications();
 
   const course: CourseWithPrerequisites | undefined = initialCourseId
     ? {
@@ -53,26 +56,69 @@ export function EnrollmentWizard({
     completedCourseIds,
   });
 
+  const resolveEnrollmentError = useCallback((error: unknown): string => {
+    if (axios.isAxiosError(error)) {
+      const apiMessage = error.response?.data?.error;
+
+      if (error.response?.status === 404) {
+        return apiMessage === 'Student or course not found'
+          ? 'Enrollment could not be completed because your learner profile or selected course could not be found. Please complete your profile and reselect the course.'
+          : apiMessage || 'The requested enrollment resource could not be found.';
+      }
+
+      return apiMessage || error.message || 'Failed to complete enrollment. Please try again.';
+    }
+
+    return error instanceof Error
+      ? error.message
+      : 'Failed to complete enrollment. Please try again.';
+  }, []);
+
   const handleSubmit = async () => {
     const validation = wizard.validateCurrentStep();
     if (!validation.isValid) return;
 
+    const selectedCourseId = wizard.state.steps.step1_courseSelection.selectedCourseId;
+
+    if (!studentId || !selectedCourseId) {
+      const message = !studentId
+        ? 'Your learner profile is not ready yet. Please complete registration before enrolling.'
+        : 'Please select a course before completing enrollment.';
+      setSubmitError(message);
+      push({
+        type: 'error',
+        title: 'Enrollment blocked',
+        message,
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError(null);
+    push({
+      type: 'enrollment',
+      title: 'Enrollment in progress',
+      message: 'Submitting your enrollment request now.',
+    });
 
     try {
-      const studentId = 'current-user';
-      const enrollment = await enrollmentsAPI.enroll(
-        studentId,
-        wizard.state.steps.step1_courseSelection.selectedCourseId
-      );
+      const enrollment = await enrollmentsAPI.enroll(studentId, selectedCourseId);
 
       wizard.clearSavedState();
+      push({
+        type: 'enrollment',
+        title: 'Enrollment complete',
+        message: 'Your course enrollment was completed successfully.',
+      });
       onComplete?.(enrollment);
     } catch (error) {
-      setSubmitError(
-        error instanceof Error ? error.message : 'Failed to complete enrollment. Please try again.'
-      );
+      const message = resolveEnrollmentError(error);
+      setSubmitError(message);
+      push({
+        type: 'error',
+        title: 'Enrollment failed',
+        message,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -260,8 +306,22 @@ export function EnrollmentWizard({
                 isLastStep={wizard.isLastStep}
                 onBack={wizard.prevStep}
                 onNext={() => {
-                  wizard.validateCurrentStep();
+                  const result = wizard.validateCurrentStep();
+                  if (!result.isValid) {
+                    push({
+                      type: 'error',
+                      title: 'Step needs attention',
+                      message:
+                        result.errors[0] || 'Please fix the highlighted fields before continuing.',
+                    });
+                    return;
+                  }
                   wizard.nextStep();
+                  push({
+                    type: 'system',
+                    title: 'Step saved',
+                    message: `Moved to step ${Math.min(wizard.currentStep + 1, 5)} of 5.`,
+                  });
                 }}
                 onSubmit={handleSubmit}
                 isSubmitting={isSubmitting}
