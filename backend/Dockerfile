@@ -13,7 +13,7 @@ COPY package*.json ./
 RUN pnpm install
 
 # Copy prisma directory explicitly
-COPY prisma ./prisma/
+COPY ./prisma ./prisma/
 
 # Generate Prisma client with relative schema path
 RUN npx prisma generate --schema=./prisma/schema.prisma
