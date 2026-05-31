@@ -3823,3 +3823,17 @@ Unique constraint failed on the fields: (`tokenId`)
 2026-05-20 09:55:58 info: Certificate minted on-chain: cert-api-stud-api-cour-1779267358588 -> token 295396
 2026-05-20 09:55:58 info: Certificate minted: cert-api-stud-api-cour-1779267358588
 2026-05-20 09:55:58 info: GET /api/v1/certificates/verify/295396
+2026-05-31 01:55:38 info: Pinned decentralized asset project/project-1/example -> bafyd37873b9cdea335789ab00f55e95233b9090e32bb1162154b65bc6c2
+2026-05-31 01:55:38 info: Unpinned stale decentralized asset bafy123
+2026-05-31 01:57:57 info: Pinned decentralized asset project/project-1/example -> bafyd37873b9cdea335789ab00f55e95233b9090e32bb1162154b65bc6c2
+2026-05-31 01:57:57 info: Unpinned stale decentralized asset bafy123
+2026-05-31 02:00:22 info: Pinned decentralized asset project/project-1/example -> bafyd37873b9cdea335789ab00f55e95233b9090e32bb1162154b65bc6c2
+2026-05-31 02:00:22 info: Unpinned stale decentralized asset bafy123
+2026-05-31 02:03:29 info: Pinned decentralized asset project/project-1/example -> bafyd37873b9cdea335789ab00f55e95233b9090e32bb1162154b65bc6c2
+2026-05-31 02:03:29 info: Unpinned stale decentralized asset bafy123
+2026-05-31 02:06:51 info: Pinned decentralized asset project/project-1/example -> bafyd37873b9cdea335789ab00f55e95233b9090e32bb1162154b65bc6c2
+2026-05-31 02:06:51 info: Unpinned stale decentralized asset bafy123
+2026-05-31 02:10:44 info: Pinned decentralized asset project/project-1/example -> bafyd37873b9cdea335789ab00f55e95233b9090e32bb1162154b65bc6c2
+2026-05-31 02:10:44 info: Unpinned stale decentralized asset bafy123
+2026-05-31 02:13:08 info: Pinned decentralized asset project/project-1/example -> bafyd37873b9cdea335789ab00f55e95233b9090e32bb1162154b65bc6c2
+2026-05-31 02:13:08 info: Unpinned stale decentralized asset bafy123

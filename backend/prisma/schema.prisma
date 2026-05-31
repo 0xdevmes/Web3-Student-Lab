@@ -206,3 +206,31 @@ model Canvas {
   @@index([studentId])
   @@index([createdAt])
 }
+
+model DecentralizedAsset {
+  id            String   @id @default(cuid())
+  workspaceId   String   @default("default")
+  resourceType  String
+  resourceId    String
+  name          String
+  kind          String
+  provider      String   @default("pinata")
+  cid           String   @unique
+  ipfsUri       String
+  gatewayUrl    String
+  mimeType      String?
+  sizeBytes     Int?
+  status        String   @default("queued")
+  referenceCount Int     @default(1)
+  metadata      Json?
+  error         String?
+  pinnedAt      DateTime?
+  unpinnedAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([workspaceId, resourceType, resourceId, name])
+  @@index([workspaceId, status])
+  @@index([workspaceId, resourceType, resourceId])
+  @@map("decentralized_assets")
+}
