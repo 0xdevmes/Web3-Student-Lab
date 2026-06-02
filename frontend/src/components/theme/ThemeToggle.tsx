@@ -73,9 +73,8 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
   // This prevents mismatches between server and client
   // The placeholder matches the expected button size
   if (!mounted) {
-    return (
-      <div className={`h-10 w-10 rounded-lg bg-gray-900 ${className}`} />
-    );
+    // Return placeholder to prevent FOUC
+    return <div className={`h-10 w-10 rounded-lg bg-gray-900 ${className}`} />;
   }
 
   // Map size prop to CSS size classes
@@ -102,22 +101,11 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={toggleTheme}
-        className={`
-          flex items-center gap-2 rounded-lg px-3 py-2
-          bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-gray-200
-          text-gray-400 hover:text-gray-300 dark:text-gray-600 dark:hover:text-gray-700
-          transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black dark:focus:ring-offset-white
-          ${className}
-        `}
-        // Announce action to screen readers
+        className={`flex items-center gap-2 rounded-lg bg-gray-900 px-3 py-2 text-gray-400 transition-colors hover:bg-gray-800 hover:text-gray-300 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black focus:outline-none dark:bg-gray-100 dark:text-gray-600 dark:hover:bg-gray-200 dark:hover:text-gray-700 dark:focus:ring-offset-white ${className} `}
         aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
       >
         <AnimatedThemeIcon isDark={isDark} size={size} />
-        {showLabel && (
-          <span className="text-sm font-medium">
-            {isDark ? 'Dark' : 'Light'}
-          </span>
-        )}
+        {showLabel && <span className="text-sm font-medium">{isDark ? 'Dark' : 'Light'}</span>}
       </motion.button>
     );
   }
@@ -130,15 +118,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       onClick={toggleTheme}
-      className={`
-        relative flex items-center justify-center rounded-lg
-        ${sizeMap[size]}
-        bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-gray-200
-        text-gray-400 hover:text-gray-300 dark:text-gray-600 dark:hover:text-gray-700
-        transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black dark:focus:ring-offset-white
-        ${className}
-      `}
-      // Describe the button's action for accessibility
+      className={`relative flex items-center justify-center rounded-lg ${sizeMap[size]} bg-gray-900 text-gray-400 transition-colors hover:bg-gray-800 hover:text-gray-300 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black focus:outline-none dark:bg-gray-100 dark:text-gray-600 dark:hover:bg-gray-200 dark:hover:text-gray-700 dark:focus:ring-offset-white ${className} `}
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
       type="button"
     >
@@ -217,38 +197,8 @@ const AnimatedThemeIcon: React.FC<{ isDark: boolean; size: 'sm' | 'md' | 'lg' }>
   );
 };
 
-/**
- * ThemeToggleCompact Component
- *
- * A minimal theme toggle variant optimized for navigation bars
- * and header areas where space is limited.
- *
- * Features:
- * - Minimal padding and size
- * - Returns null when not hydrated (prevents layout shift)
- * - Perfect for navbar integration
- * - Same smooth animations as main component
- *
- * Why separate component?
- * - Navbar has stricter sizing requirements
- * - Allows fine-tuning styling without affecting main component
- * - Better semantic clarity in code
- *
- * @param {Object} props - Component props
- * @param {string} [props.className=''] - Additional CSS classes
- * @returns {JSX.Element|null} Compact theme toggle or null if not mounted
- *
- * @example
- * // In navbar
- * <nav>
- *   <Logo />
- *   <NavLinks />
- *   <ThemeToggleCompact className="text-gray-400" />
- * </nav>
- */
-export const ThemeToggleCompact: React.FC<{ className?: string }> = ({
-  className = '',
-}) => {
+// Compact version for navigation bars
+export const ThemeToggleCompact: React.FC<{ className?: string }> = ({ className = '' }) => {
   const { isDark, mounted, toggleTheme } = useThemeMode();
 
   // Return null while hydrating to avoid layout shift
@@ -262,13 +212,7 @@ export const ThemeToggleCompact: React.FC<{ className?: string }> = ({
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       onClick={toggleTheme}
-      className={`
-        p-1.5 rounded-md text-gray-400 hover:text-gray-300
-        dark:text-gray-300 dark:hover:text-white
-        hover:bg-gray-900 dark:hover:bg-gray-800
-        transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500
-        ${className}
-      `}
+      className={`rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-900 hover:text-gray-300 focus:ring-2 focus:ring-purple-500 focus:outline-none dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white ${className} `}
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
     >
       <motion.div

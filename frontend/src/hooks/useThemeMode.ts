@@ -95,14 +95,7 @@ export function useThemeMode() {
   };
 
   // Get current theme colors
-  // These colors are used for:
-  // - CSS variable values
-  // - Chart rendering
-  // - Component styling fallbacks
-  const colors =
-    currentTheme === 'light'
-      ? THEME_COLORS.light
-      : THEME_COLORS.dark;
+  const colors = currentTheme === 'light' ? THEME_COLORS.light : THEME_COLORS.dark;
 
   // Get chart colors optimized for D3 visualizations
   // These colors are chosen for good contrast and visual distinction
