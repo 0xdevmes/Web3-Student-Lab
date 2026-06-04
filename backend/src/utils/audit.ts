@@ -1,7 +1,8 @@
 // @ts-nocheck
 import { Request } from 'express';
+import { createHash } from 'crypto';
 import prisma from '../db/index.js';
-import logger, { auditLogger } from './logger.js';
+import logger, { auditLogger, getCorrelationId } from './logger.js';
 
 export interface AuditLogData {
   userId?: string | null;

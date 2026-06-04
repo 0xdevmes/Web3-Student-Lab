@@ -23,7 +23,7 @@ import logger, {
 } from '../src/utils/logger.js';
 
 // Mock console to prevent log output during tests
-const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
 
 describe('Logger System', () => {
   beforeEach(() => {

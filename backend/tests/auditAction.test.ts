@@ -8,9 +8,13 @@ jest.unstable_mockModule('../src/utils/audit.js', () => ({
   logAudit: jest.fn(),
 }));
 
-const { auditAction } = await import('../src/middleware/audit.js');
+let auditAction: any;
 
 describe('auditAction middleware', () => {
+  beforeAll(async () => {
+    const mod = await import('../src/middleware/audit.js');
+    auditAction = mod.auditAction;
+  });
   beforeEach(() => {
     jest.clearAllMocks();
   });

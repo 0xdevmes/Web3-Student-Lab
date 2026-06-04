@@ -38,12 +38,16 @@ jest.unstable_mockModule('../../src/cache/CacheService.js', () => ({
   },
 }));
 
-// Import after mocking
-const { listCourses, getCourseCurriculum } = await import(
-  '../../src/routes/learning/learning.service.js'
-);
+let listCourses: any;
+let getCourseCurriculum: any;
 
 describe('Curriculum Service - Unit Tests', () => {
+  beforeAll(async () => {
+    const mod = await import('../../src/routes/learning/learning.service.js');
+    listCourses = mod.listCourses;
+    getCourseCurriculum = mod.getCourseCurriculum;
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockCacheGet.mockResolvedValue(null);

@@ -23,9 +23,15 @@ jest.unstable_mockModule('../src/utils/logger.js', () => ({
   },
 }));
 
-const { logAudit, logRequestAudit } = await import('../src/utils/audit.js');
+let logAudit: any;
+let logRequestAudit: any;
 
 describe('Audit Logging System', () => {
+  beforeAll(async () => {
+    const auditModule = await import('../src/utils/audit.js');
+    logAudit = auditModule.logAudit;
+    logRequestAudit = auditModule.logRequestAudit;
+  });
   beforeEach(() => {
     jest.clearAllMocks();
   });

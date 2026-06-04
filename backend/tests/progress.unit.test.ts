@@ -15,7 +15,7 @@ const mockCacheGet = jest.fn();
 const mockCacheSet = jest.fn();
 const mockInvalidateUserProgressCache = jest.fn();
 
-jest.unstable_mockModule('../../src/db/index.js', () => ({
+jest.unstable_mockModule('../src/db/index.js', () => ({
   default: {
     learningProgress: {
       findUnique: mockPrismaFindUnique,
