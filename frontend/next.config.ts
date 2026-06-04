@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
         name: 'frontend_host',
         filename: 'remoteEntry.js',
         exposes: {
-          './SharedUi': './src/microfrontends/shared/index.ts',
+          './SharedUi': './src/microfrontends/shared/index.tsx',
           './LabRemote': './src/microfrontends/remote/LabRemoteModule.tsx',
         },
         remotes: {

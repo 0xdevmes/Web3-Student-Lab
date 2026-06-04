@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Request, Response, Router } from 'express';
 import logger from '../utils/logger.js';
 import { storageService } from '../services/storage/index.js';

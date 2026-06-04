@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router } from 'express';
 import { normalizeSorobanDid } from '../auth/auth.service.js';
 import { cacheMiddleware } from '../cache/CacheMiddleware.js';

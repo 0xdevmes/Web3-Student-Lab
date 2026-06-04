@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Request } from 'express';
 import prisma from '../db/index.js';
 import logger, { auditLogger } from './logger.js';

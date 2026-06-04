@@ -2,6 +2,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { WalletProvider } from '@/contexts/WalletContext';
 import { SkeletonThemeWrapper } from '@/components/ui/SkeletonThemeWrapper';
+import { I18nProvider } from '@/i18n';
 import type { Metadata } from 'next';
 import './globals.css';
 

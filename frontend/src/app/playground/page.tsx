@@ -352,6 +352,7 @@ export default function PlaygroundPage() {
               </p>
             </div>
           </div>
+        </div>
       </div>
     </div>
   );

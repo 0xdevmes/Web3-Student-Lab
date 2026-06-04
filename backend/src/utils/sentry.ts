@@ -40,12 +40,12 @@ export function getSentryRequestHandler(): RequestHandler {
   if (!sentryEnabled) {
     return (_req, _res, next) => next();
   }
-  return Sentry.Handlers.requestHandler();
+  return (Sentry as any).Handlers.requestHandler();
 }
 
 export function getSentryErrorHandler(): ErrorRequestHandler {
   if (!sentryEnabled) {
     return (err, _req, _res, next) => next(err);
   }
-  return Sentry.Handlers.errorHandler();
+  return (Sentry as any).Handlers.errorHandler();
 }

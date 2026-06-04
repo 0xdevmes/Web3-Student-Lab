@@ -147,6 +147,7 @@ export default function CoursesPage() {
           </div>
         )}
       </section>
+      )}
     </div>
     </ErrorBoundary>
   );

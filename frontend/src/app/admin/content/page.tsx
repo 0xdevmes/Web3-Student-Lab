@@ -14,7 +14,9 @@ import {
   saveLearningJourney,
 } from '@/lib/learning-journey';
 
-export default function AdminContentPage() {
+import dynamic from 'next/dynamic';
+
+function AdminContentPageImpl() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState('');
   const [journey, setJourney] = useState<CourseLearningJourney | null>(null);
@@ -535,3 +537,5 @@ function ActionCell({ onRemove }: { onRemove: () => void }) {
     </div>
   );
 }
+
+export default dynamic(() => Promise.resolve(AdminContentPageImpl), { ssr: false });

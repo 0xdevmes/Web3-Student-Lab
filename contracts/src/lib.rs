@@ -26,4 +26,6 @@ pub mod membership_nft;
 pub mod oracle_aggregator;
 pub mod paymaster;
 pub mod payment_gateway;
+pub mod payment_scheduler;
+pub mod route_optimizer;
 pub mod timestamping;

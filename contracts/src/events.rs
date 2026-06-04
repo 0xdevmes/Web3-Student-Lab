@@ -101,7 +101,9 @@ pub struct CertificateRenewedEvent {
 
 /// Event publisher helper functions.
 pub struct EventPublisher<'a> {
+    #[allow(dead_code)]
     env: &'a Env,
+    #[allow(dead_code)]
     contract_address: Address,
 }
 
@@ -468,7 +470,9 @@ impl<'a> EventPublisher<'a> {
 
 /// Event recorder that emits v2 events for the contract.
 pub struct EventRecorder<'a> {
+    #[allow(dead_code)]
     env: &'a Env,
+    #[allow(dead_code)]
     contract_address: Address,
     pub publisher: EventPublisher<'a>,
 }

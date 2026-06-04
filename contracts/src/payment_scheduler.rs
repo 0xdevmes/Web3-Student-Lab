@@ -17,6 +17,9 @@
 //! - Execution count cannot be decremented or reset
 //! - All errors are explicitly typed (no silent failures)
 
+#![allow(clippy::too_many_arguments)]
+#![allow(clippy::implicit_saturating_sub)]
+
 use soroban_sdk::{
     contract, contracterror, contractimpl, contracttype, panic_with_error, Address, Env, String,
     Symbol, Vec,

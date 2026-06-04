@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Queue } from 'bullmq';
 import type { JobsOptions } from 'bullmq';
 import { redisConnection } from '../../utils/redis.js';

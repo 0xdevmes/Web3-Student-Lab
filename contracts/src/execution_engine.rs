@@ -11,13 +11,11 @@
 //! - Retry Invariant: Retries never exceed the maximum per execution window.
 
 use soroban_sdk::{
-    contract, contracterror, contractimpl, contracttype, panic_with_error, Address, Env, String,
-    Symbol, Vec,
+    contract, contracterror, contractimpl, panic_with_error, Env, String, Symbol, Vec,
 };
 
 use crate::payment_scheduler::{
-    Condition, ExecutionRecord, PaymentSchedule, PaymentSchedulerError, PaymentSchedulerKey,
-    ScheduleId, ScheduleStatus,
+    Condition, ExecutionRecord, PaymentSchedule, PaymentSchedulerKey, ScheduleId, ScheduleStatus,
 };
 
 /// Error types for execution engine
@@ -314,7 +312,7 @@ impl ExecutionEngineContract {
     /// true if condition passes, false otherwise
     fn check_single_condition(env: &Env, condition: &Condition) -> bool {
         match condition {
-            Condition::BalanceVerification(account, _token_address, _min_balance) => {
+            Condition::BalanceVerification(_account, _token_address, _min_balance) => {
                 // In production, this would call the token contract to check balance
                 // For now, we simulate a successful check
                 // Real implementation would be:

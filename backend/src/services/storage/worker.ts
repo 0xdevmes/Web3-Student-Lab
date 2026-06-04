@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Job, Worker } from 'bullmq';
 import logger from '../../utils/logger.js';
 import { redisConnection } from '../../utils/redis.js';

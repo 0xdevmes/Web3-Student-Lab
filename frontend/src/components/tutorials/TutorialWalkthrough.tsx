@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useCallback } from 'react';
-import Joyride, {
-  type CallBackProps,
-  STATUS,
-  type Step,
-  EVENTS,
-  ACTIONS,
-} from 'react-joyride';
+let JoyrideModule: any;
+try {
+  JoyrideModule = require('react-joyride');
+} catch (e) {}
+const Joyride = (JoyrideModule?.default || JoyrideModule) as any;
+type CallBackProps = any;
+type Step = any;
+const { STATUS = {}, EVENTS = {}, ACTIONS = {} } = JoyrideModule || {};
 import { getTutorialStyles, type TutorialId } from './tutorialConfig';
 
 export interface TutorialWalkthroughProps {

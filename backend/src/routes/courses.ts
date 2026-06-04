@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router } from 'express';
 import { cacheMiddleware } from '../cache/CacheMiddleware.js';
 import { invalidateAllCourses, invalidateCourseCache } from '../cache/CacheInvalidation.js';

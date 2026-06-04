@@ -107,7 +107,10 @@ impl CommitRevealRng {
 
         let mut commits: Map<Address, BytesN<32>> =
             env.storage().instance().get(&COMMITS_KEY).unwrap();
-        assert!(!commits.contains_key(participant.clone()), "already committed");
+        assert!(
+            !commits.contains_key(participant.clone()),
+            "already committed"
+        );
 
         commits.set(participant.clone(), commitment);
         env.storage().instance().set(&COMMITS_KEY, &commits);
@@ -152,8 +155,7 @@ impl CommitRevealRng {
             "reveal window closed"
         );
 
-        let commits: Map<Address, BytesN<32>> =
-            env.storage().instance().get(&COMMITS_KEY).unwrap();
+        let commits: Map<Address, BytesN<32>> = env.storage().instance().get(&COMMITS_KEY).unwrap();
         let commitment = commits
             .get(participant.clone())
             .expect("participant did not commit");
@@ -162,15 +164,16 @@ impl CommitRevealRng {
         let hash = env.crypto().sha256(&secret);
         assert!(hash == commitment, "secret does not match commitment");
 
-        let mut reveals: Map<Address, bool> =
-            env.storage().instance().get(&REVEALS_KEY).unwrap();
-        assert!(!reveals.contains_key(participant.clone()), "already revealed");
+        let mut reveals: Map<Address, bool> = env.storage().instance().get(&REVEALS_KEY).unwrap();
+        assert!(
+            !reveals.contains_key(participant.clone()),
+            "already revealed"
+        );
         reveals.set(participant.clone(), true);
         env.storage().instance().set(&REVEALS_KEY, &reveals);
 
         // XOR the new secret hash into the running entropy accumulator.
-        let current_entropy: BytesN<32> =
-            env.storage().instance().get(&ENTROPY_KEY).unwrap();
+        let current_entropy: BytesN<32> = env.storage().instance().get(&ENTROPY_KEY).unwrap();
         let new_entropy = Self::xor_bytes32(&env, &current_entropy, &hash);
         env.storage().instance().set(&ENTROPY_KEY, &new_entropy);
 
@@ -190,19 +193,15 @@ impl CommitRevealRng {
             "reveal window still open"
         );
 
-        let commits: Map<Address, BytesN<32>> =
-            env.storage().instance().get(&COMMITS_KEY).unwrap();
-        let reveals: Map<Address, bool> =
-            env.storage().instance().get(&REVEALS_KEY).unwrap();
+        let commits: Map<Address, BytesN<32>> = env.storage().instance().get(&COMMITS_KEY).unwrap();
+        let reveals: Map<Address, bool> = env.storage().instance().get(&REVEALS_KEY).unwrap();
 
-        let mut slashed: Vec<Address> =
-            env.storage().instance().get(&SLASHED_KEY).unwrap();
+        let mut slashed: Vec<Address> = env.storage().instance().get(&SLASHED_KEY).unwrap();
 
         for (addr, _) in commits.iter() {
             if !reveals.contains_key(addr.clone()) {
                 slashed.push_back(addr.clone());
-                env.events()
-                    .publish((symbol_short!("slashed"), addr), ());
+                env.events().publish((symbol_short!("slashed"), addr), ());
             }
         }
         env.storage().instance().set(&SLASHED_KEY, &slashed);
@@ -231,7 +230,8 @@ impl CommitRevealRng {
         env.storage().instance().set(&RESULT_KEY, &result);
         env.storage().instance().set(&PHASE_KEY, &Phase::Finalised);
 
-        env.events().publish((symbol_short!("finalised"),), result.clone());
+        env.events()
+            .publish((symbol_short!("finalised"),), result.clone());
         result
     }
 

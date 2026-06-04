@@ -31,7 +31,9 @@
 
 #![no_std]
 
-use soroban_sdk::{contract, contractimpl, contracttype, symbol_short, Address, Env, Map, Symbol, Vec};
+use soroban_sdk::{
+    contract, contractimpl, contracttype, symbol_short, Address, Env, Map, Symbol, Vec,
+};
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const POOL_KEY: Symbol = symbol_short!("POOL");
@@ -102,8 +104,7 @@ impl QuadraticFunding {
         Self::assert_admin(&env, &admin);
         Self::assert_round_open(&env);
 
-        let mut projects: Map<u32, Project> =
-            env.storage().instance().get(&PROJECTS_KEY).unwrap();
+        let mut projects: Map<u32, Project> = env.storage().instance().get(&PROJECTS_KEY).unwrap();
         assert!(!projects.contains_key(project_id), "project already exists");
 
         projects.set(
@@ -124,8 +125,7 @@ impl QuadraticFunding {
     pub fn whitelist_donor(env: Env, admin: Address, donor: Address) {
         admin.require_auth();
         Self::assert_admin(&env, &admin);
-        let mut wl: Map<Address, bool> =
-            env.storage().instance().get(&WHITELIST_KEY).unwrap();
+        let mut wl: Map<Address, bool> = env.storage().instance().get(&WHITELIST_KEY).unwrap();
         wl.set(donor, true);
         env.storage().instance().set(&WHITELIST_KEY, &wl);
     }
@@ -149,10 +149,12 @@ impl QuadraticFunding {
 
         // Sybil check
         let wl: Map<Address, bool> = env.storage().instance().get(&WHITELIST_KEY).unwrap();
-        assert!(wl.get(donor.clone()).unwrap_or(false), "donor not whitelisted");
+        assert!(
+            wl.get(donor.clone()).unwrap_or(false),
+            "donor not whitelisted"
+        );
 
-        let mut projects: Map<u32, Project> =
-            env.storage().instance().get(&PROJECTS_KEY).unwrap();
+        let mut projects: Map<u32, Project> = env.storage().instance().get(&PROJECTS_KEY).unwrap();
         let mut project = projects.get(project_id).expect("project not found");
 
         // One donation per donor per project
@@ -195,8 +197,7 @@ impl QuadraticFunding {
         Self::assert_round_open(&env);
 
         let pool: i128 = env.storage().instance().get(&POOL_KEY).unwrap();
-        let projects: Map<u32, Project> =
-            env.storage().instance().get(&PROJECTS_KEY).unwrap();
+        let projects: Map<u32, Project> = env.storage().instance().get(&PROJECTS_KEY).unwrap();
 
         // Compute match weight for each project: (sqrt_sum)²
         let mut total_weight: i128 = 0;
@@ -244,8 +245,7 @@ impl QuadraticFunding {
 
     /// Returns the project data for `project_id`.
     pub fn get_project(env: Env, project_id: u32) -> Project {
-        let projects: Map<u32, Project> =
-            env.storage().instance().get(&PROJECTS_KEY).unwrap();
+        let projects: Map<u32, Project> = env.storage().instance().get(&PROJECTS_KEY).unwrap();
         projects.get(project_id).expect("project not found")
     }
 
@@ -277,7 +277,10 @@ impl QuadraticFunding {
 
     fn assert_round_open(env: &Env) {
         assert!(
-            env.storage().instance().get::<Symbol, bool>(&ROUND_OPEN).unwrap_or(false),
+            env.storage()
+                .instance()
+                .get::<Symbol, bool>(&ROUND_OPEN)
+                .unwrap_or(false),
             "round not open"
         );
     }
@@ -387,11 +390,18 @@ mod tests {
         let mut p2_amount = 0i128;
         for i in 0..payouts.len() {
             let (id, amount) = payouts.get(i).unwrap();
-            if id == 1 { p1_amount = amount; }
-            if id == 2 { p2_amount = amount; }
+            if id == 1 {
+                p1_amount = amount;
+            }
+            if id == 2 {
+                p2_amount = amount;
+            }
         }
         // Project 1 should receive more matching than project 2
-        assert!(p1_amount > p2_amount, "project with more donors should get more matching");
+        assert!(
+            p1_amount > p2_amount,
+            "project with more donors should get more matching"
+        );
     }
 
     #[test]

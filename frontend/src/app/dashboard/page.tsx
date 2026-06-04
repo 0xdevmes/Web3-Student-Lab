@@ -227,6 +227,12 @@ export default function DashboardPage() {
                     {loading ? '...' : item.value}
                   </p>
                   <p className="mt-1 text-sm text-[var(--muted)]">{item.label}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
     </div>
     </ErrorBoundary>
   );

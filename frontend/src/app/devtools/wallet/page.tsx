@@ -1,8 +1,13 @@
 'use client';
 
 import { useWallet, WALLET_PROVIDERS } from '@/contexts/WalletContext';
-import { TransactionStateChart } from '@/components/wallet/TransactionStateChart';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+
+const TransactionStateChart = dynamic(
+  () => import('@/components/wallet/TransactionStateChart').then(mod => mod.TransactionStateChart),
+  { ssr: false }
+);
 
 function truncate(pk: string) {
   return `${pk.slice(0, 6)}...${pk.slice(-6)}`;

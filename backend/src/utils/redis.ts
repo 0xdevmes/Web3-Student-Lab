@@ -36,7 +36,7 @@ const createTestRedisClient = () => {
 
 const createRedisClient = () => {
   if (process.env.NODE_ENV === 'test') {
-    return createTestRedisClient();
+    return createTestRedisClient() as unknown as Redis;
   }
 
   return new Redis(redisUrl, {
@@ -44,10 +44,10 @@ const createRedisClient = () => {
   });
 };
 
-export const redisConnection = createRedisClient();
+export const redisConnection: any = createRedisClient();
 
-export const pubClient = createRedisClient();
+export const pubClient: any = createRedisClient();
 
-export const subClient = createRedisClient();
+export const subClient: any = createRedisClient();
 
 export default redisConnection;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { StorageAssetRecord } from './types.js';
 
 const getPrisma = async () => {

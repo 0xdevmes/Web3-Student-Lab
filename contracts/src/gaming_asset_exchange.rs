@@ -1,3 +1,5 @@
+#![allow(clippy::too_many_arguments)]
+
 use soroban_sdk::{
     contract, contracterror, contractimpl, contracttype, panic_with_error, Address, Env, Map,
     String, Symbol, Vec,
@@ -102,7 +104,9 @@ impl GamingAssetExchangeContract {
         env.storage()
             .instance()
             .set(&DataKey::AssetOwner(counter), &to);
-        env.storage().instance().set(&DataKey::AssetCounter, &counter);
+        env.storage()
+            .instance()
+            .set(&DataKey::AssetCounter, &counter);
 
         let mut assets: Vec<u32> = env
             .storage()
@@ -270,6 +274,8 @@ impl GamingAssetExchangeContract {
 
     /// Return whether the asset is currently listed for sale.
     pub fn is_listed(env: Env, asset_id: u32) -> bool {
-        env.storage().instance().has(&DataKey::AssetListing(asset_id))
+        env.storage()
+            .instance()
+            .has(&DataKey::AssetListing(asset_id))
     }
 }

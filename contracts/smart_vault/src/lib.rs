@@ -51,16 +51,8 @@ impl SmartVault {
         user.require_auth();
         assert!(amount > 0, "amount must be positive");
 
-        let total_assets: i128 = env
-            .storage()
-            .instance()
-            .get(&TOTAL_ASSETS)
-            .unwrap_or(0i128);
-        let total_shares: i128 = env
-            .storage()
-            .instance()
-            .get(&TOTAL_SHARES)
-            .unwrap_or(0i128);
+        let total_assets: i128 = env.storage().instance().get(&TOTAL_ASSETS).unwrap_or(0i128);
+        let total_shares: i128 = env.storage().instance().get(&TOTAL_SHARES).unwrap_or(0i128);
 
         // shares_to_mint = amount * total_shares / total_assets  (or 1:1 on first deposit)
         let new_shares: i128 = if total_shares == 0 || total_assets == 0 {
@@ -77,12 +69,14 @@ impl SmartVault {
         pos.shares = pos.shares.checked_add(new_shares).expect("overflow");
         Self::set_position(&env, &user, &pos);
 
-        env.storage()
-            .instance()
-            .set(&TOTAL_SHARES, &(total_shares.checked_add(new_shares).expect("overflow")));
-        env.storage()
-            .instance()
-            .set(&TOTAL_ASSETS, &(total_assets.checked_add(amount).expect("overflow")));
+        env.storage().instance().set(
+            &TOTAL_SHARES,
+            &(total_shares.checked_add(new_shares).expect("overflow")),
+        );
+        env.storage().instance().set(
+            &TOTAL_ASSETS,
+            &(total_assets.checked_add(amount).expect("overflow")),
+        );
 
         env.events()
             .publish((symbol_short!("deposit"), user), (amount, new_shares));
@@ -103,16 +97,8 @@ impl SmartVault {
         let mut pos = Self::get_position(&env, &user);
         assert!(pos.shares >= shares, "insufficient shares");
 
-        let total_assets: i128 = env
-            .storage()
-            .instance()
-            .get(&TOTAL_ASSETS)
-            .unwrap_or(0i128);
-        let total_shares: i128 = env
-            .storage()
-            .instance()
-            .get(&TOTAL_SHARES)
-            .unwrap_or(0i128);
+        let total_assets: i128 = env.storage().instance().get(&TOTAL_ASSETS).unwrap_or(0i128);
+        let total_shares: i128 = env.storage().instance().get(&TOTAL_SHARES).unwrap_or(0i128);
 
         // assets_out = shares * total_assets / total_shares
         let assets_out = shares
@@ -124,12 +110,14 @@ impl SmartVault {
         pos.shares = pos.shares.checked_sub(shares).expect("underflow");
         Self::set_position(&env, &user, &pos);
 
-        env.storage()
-            .instance()
-            .set(&TOTAL_SHARES, &(total_shares.checked_sub(shares).expect("underflow")));
-        env.storage()
-            .instance()
-            .set(&TOTAL_ASSETS, &(total_assets.checked_sub(assets_out).expect("underflow")));
+        env.storage().instance().set(
+            &TOTAL_SHARES,
+            &(total_shares.checked_sub(shares).expect("underflow")),
+        );
+        env.storage().instance().set(
+            &TOTAL_ASSETS,
+            &(total_assets.checked_sub(assets_out).expect("underflow")),
+        );
 
         env.events()
             .publish((symbol_short!("withdraw"), user), (shares, assets_out));
@@ -148,8 +136,7 @@ impl SmartVault {
         env.storage()
             .instance()
             .set(&symbol_short!("staked_at"), &ledger);
-        env.events()
-            .publish((symbol_short!("staked"),), ledger);
+        env.events().publish((symbol_short!("staked"),), ledger);
     }
 
     // ── Harvest ──────────────────────────────────────────────────────────────
@@ -178,16 +165,8 @@ impl SmartVault {
             .get(&symbol_short!("staked_at"))
             .unwrap_or(current_ledger);
 
-        let total_assets: i128 = env
-            .storage()
-            .instance()
-            .get(&TOTAL_ASSETS)
-            .unwrap_or(0i128);
-        let total_shares: i128 = env
-            .storage()
-            .instance()
-            .get(&TOTAL_SHARES)
-            .unwrap_or(0i128);
+        let total_assets: i128 = env.storage().instance().get(&TOTAL_ASSETS).unwrap_or(0i128);
+        let total_shares: i128 = env.storage().instance().get(&TOTAL_SHARES).unwrap_or(0i128);
 
         if total_shares == 0 {
             return 0;
@@ -214,9 +193,10 @@ impl SmartVault {
         }
 
         // Credit reward to total assets (raises share price for everyone).
-        env.storage()
-            .instance()
-            .set(&TOTAL_ASSETS, &(total_assets.checked_add(reward).expect("overflow")));
+        env.storage().instance().set(
+            &TOTAL_ASSETS,
+            &(total_assets.checked_add(reward).expect("overflow")),
+        );
 
         pos.last_harvest = current_ledger;
         Self::set_position(&env, &user, &pos);
@@ -241,16 +221,8 @@ impl SmartVault {
         }
 
         // Re-deposit the reward (no auth needed; user already authed in harvest)
-        let total_assets: i128 = env
-            .storage()
-            .instance()
-            .get(&TOTAL_ASSETS)
-            .unwrap_or(0i128);
-        let total_shares: i128 = env
-            .storage()
-            .instance()
-            .get(&TOTAL_SHARES)
-            .unwrap_or(0i128);
+        let total_assets: i128 = env.storage().instance().get(&TOTAL_ASSETS).unwrap_or(0i128);
+        let total_shares: i128 = env.storage().instance().get(&TOTAL_SHARES).unwrap_or(0i128);
 
         let new_shares = if total_shares == 0 || total_assets == 0 {
             reward
@@ -266,9 +238,10 @@ impl SmartVault {
         pos.shares = pos.shares.checked_add(new_shares).expect("overflow");
         Self::set_position(&env, &user, &pos);
 
-        env.storage()
-            .instance()
-            .set(&TOTAL_SHARES, &(total_shares.checked_add(new_shares).expect("overflow")));
+        env.storage().instance().set(
+            &TOTAL_SHARES,
+            &(total_shares.checked_add(new_shares).expect("overflow")),
+        );
         // total_assets already includes the reward from harvest
 
         env.events()
@@ -287,16 +260,8 @@ impl SmartVault {
     /// Returns the asset value of `shares` at the current exchange rate.
     pub fn assets_of(env: Env, user: Address) -> i128 {
         let pos = Self::get_position(&env, &user);
-        let total_assets: i128 = env
-            .storage()
-            .instance()
-            .get(&TOTAL_ASSETS)
-            .unwrap_or(0i128);
-        let total_shares: i128 = env
-            .storage()
-            .instance()
-            .get(&TOTAL_SHARES)
-            .unwrap_or(0i128);
+        let total_assets: i128 = env.storage().instance().get(&TOTAL_ASSETS).unwrap_or(0i128);
+        let total_shares: i128 = env.storage().instance().get(&TOTAL_SHARES).unwrap_or(0i128);
         if total_shares == 0 {
             return 0;
         }
@@ -310,10 +275,10 @@ impl SmartVault {
     // ── Internal helpers ─────────────────────────────────────────────────────
 
     fn get_position(env: &Env, user: &Address) -> Position {
-        env.storage()
-            .persistent()
-            .get(user)
-            .unwrap_or(Position { shares: 0, last_harvest: 0 })
+        env.storage().persistent().get(user).unwrap_or(Position {
+            shares: 0,
+            last_harvest: 0,
+        })
     }
 
     fn set_position(env: &Env, user: &Address, pos: &Position) {
@@ -389,7 +354,8 @@ mod tests {
         client.stake(&user);
 
         // Advance ledger past cooldown + enough for non-zero reward
-        env.ledger().with_mut(|l| l.sequence_number += 10_000 + HARVEST_COOL);
+        env.ledger()
+            .with_mut(|l| l.sequence_number += 10_000 + HARVEST_COOL);
 
         let reward = client.harvest(&user);
         assert!(reward > 0, "expected positive reward");
@@ -403,7 +369,8 @@ mod tests {
 
         client.deposit(&user, &1_000_000);
         client.stake(&user);
-        env.ledger().with_mut(|l| l.sequence_number += 10_000 + HARVEST_COOL);
+        env.ledger()
+            .with_mut(|l| l.sequence_number += 10_000 + HARVEST_COOL);
         client.harvest(&user);
 
         // Immediate second harvest should fail cooldown
@@ -417,7 +384,8 @@ mod tests {
 
         client.deposit(&user, &1_000_000);
         client.stake(&user);
-        env.ledger().with_mut(|l| l.sequence_number += 10_000 + HARVEST_COOL);
+        env.ledger()
+            .with_mut(|l| l.sequence_number += 10_000 + HARVEST_COOL);
 
         let shares_before = client.shares_of(&user);
         let new_shares = client.compound(&user);
@@ -441,7 +409,8 @@ mod tests {
 
         client.deposit(&user, &1_000_000);
         client.stake(&user);
-        env.ledger().with_mut(|l| l.sequence_number += 10_000 + HARVEST_COOL);
+        env.ledger()
+            .with_mut(|l| l.sequence_number += 10_000 + HARVEST_COOL);
         client.harvest(&user);
 
         // user2 deposits same amount but gets fewer shares (price went up)

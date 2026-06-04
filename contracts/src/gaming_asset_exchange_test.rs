@@ -1,6 +1,6 @@
 use super::*;
 extern crate std;
-use soroban_sdk::{testutils::Address as _, Address, Env, FromVal, String, Vec, Map};
+use soroban_sdk::{testutils::Address as _, Address, Env, FromVal, Map, String, Vec};
 
 fn setup() -> (
     Env,
@@ -21,8 +21,14 @@ fn setup() -> (
 
 fn build_asset_attributes(env: &Env) -> Map<String, String> {
     let mut attrs = Map::new(env);
-    attrs.set(&String::from_str(env, "rarity"), &String::from_str(env, "epic"));
-    attrs.set(&String::from_str(env, "power"), &String::from_str(env, "42"));
+    attrs.set(
+        &String::from_str(env, "rarity"),
+        &String::from_str(env, "epic"),
+    );
+    attrs.set(
+        &String::from_str(env, "power"),
+        &String::from_str(env, "42"),
+    );
     attrs
 }
 
@@ -57,7 +63,13 @@ fn mint_asset_assigns_owner_and_metadata() {
     assert_eq!(metadata.description, description);
     assert_eq!(metadata.image_uri, image_uri);
     assert_eq!(metadata.external_url, external_url);
-    assert_eq!(metadata.attributes.get(&String::from_str(&env, "rarity")).unwrap(), String::from_str(&env, "epic"));
+    assert_eq!(
+        metadata
+            .attributes
+            .get(&String::from_str(&env, "rarity"))
+            .unwrap(),
+        String::from_str(&env, "epic")
+    );
 
     let game_assets = client.get_assets_by_game(&game_id);
     assert_eq!(game_assets.len(), 1);
