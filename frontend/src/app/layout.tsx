@@ -53,18 +53,20 @@ export default function RootLayout({
               <I18nProvider>
                 <NotificationProvider>
                   <Web3OnboardingProvider>
-                    <SkipLink
-                      targets={[
-                        { id: 'main-content', label: 'Skip to main content' },
-                        { id: 'primary-navigation', label: 'Skip to navigation' },
-                      ]}
-                    />
-                    <Navbar />
-                    <ResiliencyBanner />
-                    <main id="main-content" className="flex-grow outline-none" tabIndex={-1}>
-                      {children}
-                    </main>
-                    <ToastContainer />
+                    <KeyboardShortcutsProvider>
+                      <SkipLink
+                        targets={[
+                          { id: 'main-content', label: 'Skip to main content' },
+                          { id: 'primary-navigation', label: 'Skip to navigation' },
+                        ]}
+                      />
+                      <Navbar />
+                      <ResiliencyBanner />
+                      <main id="main-content" className="flex-grow outline-none" tabIndex={-1}>
+                        {children}
+                      </main>
+                      <ToastContainer />
+                    </KeyboardShortcutsProvider>
                   </Web3OnboardingProvider>
                 </NotificationProvider>
               </I18nProvider>

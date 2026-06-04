@@ -26,14 +26,14 @@ const nextConfig: NextConfig = {
         remotes: {
           lab_remote: 'lab_remote@http://localhost:3000/remoteEntry.js',
         },
-        shared: {
+        /* shared: {
           react: { singleton: true, eager: false, requiredVersion: false },
           'react-dom': { singleton: true, eager: false, requiredVersion: false },
           zustand: { singleton: true, eager: false, requiredVersion: false },
           d3: { singleton: true, eager: false, requiredVersion: false },
           axios: { singleton: true, eager: false, requiredVersion: false },
           '@stellar/stellar-sdk': { singleton: true, eager: false, requiredVersion: false },
-        },
+        }, */
       })
     );
 

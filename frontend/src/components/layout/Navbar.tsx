@@ -10,6 +10,7 @@ import { ArrowRight, Keyboard, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { useKeyboardShortcuts } from '@/components/keyboard/KeyboardShortcutsProvider';
 
 export default function Navbar() {
   const pathname = usePathname();
