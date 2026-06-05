@@ -11,7 +11,7 @@
  * - Tests verify header propagation to responses
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { Request, Response, NextFunction } from 'express';
 import {
   detailedRequestLogger,
@@ -24,9 +24,9 @@ import logger, {
 } from '../src/utils/logger.js';
 
 // Mock logger to prevent actual log output during tests
-const loggerInfoSpy = vi.spyOn(logger, 'info');
-const loggerWarnSpy = vi.spyOn(logger, 'warn');
-const loggerErrorSpy = vi.spyOn(logger, 'error');
+const loggerInfoSpy = jest.spyOn(logger, 'info');
+const loggerWarnSpy = jest.spyOn(logger, 'warn');
+const loggerErrorSpy = jest.spyOn(logger, 'error');
 
 describe('Request Logger Middleware', () => {
   let mockReq: Partial<Request>;
@@ -63,19 +63,19 @@ describe('Request Logger Middleware', () => {
     mockRes = {
       statusCode: 200,
       headers: {},
-      setHeader: vi.fn(function (this: Response, name: string, value: string) {
+      setHeader: jest.fn(function (this: Response, name: string, value: string) {
         this.headers[name] = value;
       }),
-      get: vi.fn(function (this: Response, name: string) {
+      get: jest.fn(function (this: Response, name: string) {
         return this.headers[name];
       }),
-      send: vi.fn(function (this: Response) {
+      send: jest.fn(function (this: Response) {
         return this;
       }),
     };
 
     // Setup mock next function
-    mockNext = vi.fn();
+    mockNext = jest.fn();
   });
 
   afterEach(() => {
@@ -250,7 +250,7 @@ describe('Request Logger Middleware', () => {
       const startTime = mockReq.startTime;
 
       // Simulate some delay
-      vi.advanceTimersByTime(100);
+      jest.advanceTimersByTime(100);
 
       (mockRes.send as any).call(mockRes);
 

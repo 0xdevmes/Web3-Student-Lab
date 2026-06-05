@@ -14,7 +14,7 @@ const mockPrismaFindUnique = jest.fn();
 const mockCacheGet = jest.fn();
 const mockCacheSet = jest.fn();
 
-jest.unstable_mockModule('../../src/db/index.js', () => ({
+jest.unstable_mockModule('../src/db/index.js', () => ({
   default: {
     course: {
       findMany: mockPrismaFindMany,
@@ -25,7 +25,7 @@ jest.unstable_mockModule('../../src/db/index.js', () => ({
   },
 }));
 
-jest.unstable_mockModule('../../src/cache/CacheService.js', () => ({
+jest.unstable_mockModule('../src/cache/CacheService.js', () => ({
   default: {
     get: mockCacheGet,
     set: mockCacheSet,
@@ -43,7 +43,7 @@ let getCourseCurriculum: any;
 
 describe('Curriculum Service - Unit Tests', () => {
   beforeAll(async () => {
-    const mod = await import('../../src/routes/learning/learning.service.js');
+    const mod = await import('../src/routes/learning/learning.service.js');
     listCourses = mod.listCourses;
     getCourseCurriculum = mod.getCourseCurriculum;
   });

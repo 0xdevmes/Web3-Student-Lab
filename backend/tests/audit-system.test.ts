@@ -21,6 +21,7 @@ jest.unstable_mockModule('../src/utils/logger.js', () => ({
     error: jest.fn(),
     info: jest.fn(),
   },
+  getCorrelationId: jest.fn().mockReturnValue('test-id'),
 }));
 
 let logAudit: any;

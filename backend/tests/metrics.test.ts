@@ -12,18 +12,21 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { MetricsCollector } from '../src/metrics/MetricsCollector.js';
 
-// ── Mock logger so tests don't write to disk ──────────────────────────────────
-const mockLogger = {
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-};
+jest.mock('../src/utils/logger.js', () => {
+  const mockLogger = {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+  return {
+    __esModule: true,
+    default: mockLogger,
+    auditLogger: { info: jest.fn() },
+  };
+});
 
-jest.mock('../src/utils/logger.js', () => ({
-  __esModule: true,
-  default: mockLogger,
-  auditLogger: { info: jest.fn() },
-}));
+import mockLoggerImport from '../src/utils/logger.js';
+const mockLogger = mockLoggerImport as unknown as { info: jest.Mock, warn: jest.Mock, error: jest.Mock };
 
 // ─── MetricsCollector unit tests ─────────────────────────────────────────────
 

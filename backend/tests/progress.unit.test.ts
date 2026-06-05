@@ -29,7 +29,7 @@ jest.unstable_mockModule('../src/db/index.js', () => ({
   },
 }));
 
-jest.unstable_mockModule('../../src/cache/CacheService.js', () => ({
+jest.unstable_mockModule('../src/cache/CacheService.js', () => ({
   default: {
     get: mockCacheGet,
     set: mockCacheSet,
@@ -45,7 +45,7 @@ jest.unstable_mockModule('../../src/cache/CacheService.js', () => ({
   },
 }));
 
-jest.unstable_mockModule('../../src/cache/CacheInvalidation.js', () => ({
+jest.unstable_mockModule('../src/cache/CacheInvalidation.js', () => ({
   invalidateUserProgressCache: mockInvalidateUserProgressCache,
 }));
 
@@ -54,7 +54,7 @@ let updateStudentProgress: any;
 
 describe('Progress Service - Unit Tests', () => {
   beforeAll(async () => {
-    const service = await import('../../src/routes/learning/learning.service.js');
+    const service = await import('../src/routes/learning/learning.service.js');
     getStudentProgress = service.getStudentProgress;
     updateStudentProgress = service.updateStudentProgress;
   });

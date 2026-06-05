@@ -21,6 +21,7 @@ jest.mock('../src/utils/logger.js', () => ({
   auditLogger: {
     info: jest.fn(),
   },
+  getCorrelationId: jest.fn().mockReturnValue('test-correlation-id'),
 }));
 
 describe('Audit Logging System', () => {

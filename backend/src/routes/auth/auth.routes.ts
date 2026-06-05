@@ -64,6 +64,7 @@ router.get('/profile-status', async (req: Request, res: Response) => {
     const result = await getProfileStatusByWallet(walletAddress);
     res.json(result);
   } catch (_error) {
+    console.error("PROFILE STATUS ERROR:", _error);
     res.status(500).json({ error: 'Failed to fetch profile status' });
   }
 });

@@ -128,7 +128,7 @@ export const detailedRequestLogger = (req: Request, res: Response, next: NextFun
     const duration = req.startTime ? Date.now() - req.startTime : 0;
 
     // Log response details
-    const logLevel = res.statusCode >= 400 ? 'warn' : res.statusCode >= 500 ? 'error' : 'info';
+    const logLevel = res.statusCode >= 500 ? 'error' : res.statusCode >= 400 ? 'warn' : 'info';
 
     logger[logLevel]('Request completed', {
       method: req.method,

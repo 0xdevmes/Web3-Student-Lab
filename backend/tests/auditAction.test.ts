@@ -3,18 +3,14 @@ import { Request, Response } from 'express';
 
 const mockLogRequestAudit = jest.fn().mockResolvedValue(undefined as never);
 
-jest.unstable_mockModule('../src/utils/audit.js', () => ({
+jest.mock('../src/utils/audit.js', () => ({
   logRequestAudit: mockLogRequestAudit,
   logAudit: jest.fn(),
 }));
 
-let auditAction: any;
+import { auditAction } from '../src/middleware/audit.js';
 
 describe('auditAction middleware', () => {
-  beforeAll(async () => {
-    const mod = await import('../src/middleware/audit.js');
-    auditAction = mod.auditAction;
-  });
   beforeEach(() => {
     jest.clearAllMocks();
   });
