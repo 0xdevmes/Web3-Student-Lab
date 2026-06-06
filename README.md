@@ -53,15 +53,17 @@ The application is fully deployed and accessible online:
 web3-student-lab/
 ├── contracts/            # Platform smart contracts (e.g., on-chain certificates)
 ├── frontend/             # Next.js/React frontend application
-│   ├── simulator/        # Visual blockchain tools
-│   ├── playground/       # In-browser smart contract editor
-│   ├── roadmap/          # Learning progress tracking and paths
-│   └── ideas/            # Hackathon project generator UI
+│   └── src/app/
+│       ├── simulator/    # Visual blockchain tools
+│       ├── playground/   # In-browser smart contract editor
+│       ├── roadmap/      # Learning progress tracking and paths
+│       └── ideas/        # Hackathon project generator UI
 ├── backend/              # Node.js backend application
-│   ├── blockchain/       # Interaction with Stellar/Soroban
-│   ├── contracts/        # Compilation and execution engine for student code
-│   ├── learning/         # Curriculum and progress APIs
-│   └── generator/        # Prompt/AI layer for hackathon ideas
+│   └── src/
+│       ├── blockchain/   # Interaction with Stellar/Soroban
+│       ├── contracts/    # Compilation and execution engine for student code
+│       ├── learning/     # Curriculum and progress APIs
+│       └── generator/    # Prompt/AI layer for hackathon ideas
 └── docs/                 # Documentation and learning materials
 ```
 
