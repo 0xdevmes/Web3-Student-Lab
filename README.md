@@ -15,6 +15,7 @@ for beginners and university students.
 The application is fully deployed and accessible online:
 - **Frontend Application**: [https://web3-student-lab.vercel.app/](https://web3-student-lab.vercel.app/)
 - **Backend Infrastructure**: Hosted securely on Render using PostgreSQL, Redis, and integrated with the Stellar/Soroban Testnet.
+- **Smart Contracts**: My contract is deployed!
 
 ## 🚀 Core Modules
 
